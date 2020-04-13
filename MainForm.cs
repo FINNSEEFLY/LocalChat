@@ -24,13 +24,17 @@ namespace LocalChat
             Все последующие:
                 сообщение
         */
-        /* Формат пакета UDP (от слушающего узла):
-            0 байт: номер порт слушающего узла для установления TCP
-            1 байт: длина имени узла
-            2-... байты: имя узла
-        */
-        /* Формат пакета UDP (от отвечающего узла):
-            0 байт: порт отвечающего узла
+        /* Формат широковещательного UDP пакета:
+                0 байт: Тип сообщения
+                        1 - Новый пользователь сообщает о себе
+                        2 - Попытка связи с новым пользователем
+           Если 0 байт = 1:
+                1 байт: длина имени пользователя
+                n байт: имя пользователя
+           Если 0 байт = 2:
+                1-4 байты: IP адресс того, к кому хотят подключится
+                5 байт: номер порта для TCP соединения
+                6 байт: 
         */
         private const byte NUM_OF_AVAILABLE_PORTS = 255;
         private const UInt32 TCP_OFFSET_RECEIVING_PORTS = 12000;
@@ -44,19 +48,22 @@ namespace LocalChat
         private bool isConnected = false;
         private string username;
         private List<User> users = new List<User>();
-        private List<Task> ListenTCPs = new List<Task>();
+        private IPAddress localIPAdress;
 
 
         // Установка соединения со всеми работающими узлами
-        private void MakeConnection()
+        private void SendBroadcastMessage()
         {
             // Отправить широковещательный пакет с именем
             var udpClient = new UdpClient(BROADCAST_ADDRESS, (int)UDP_BROADCAST_PORT);
             udpClient.EnableBroadcast = true;
-            var data = Encoding.Unicode.GetBytes(username);
+            var usernameBytes = Encoding.Unicode.GetBytes(username);
+            var data = new byte[2 + usernameBytes.Length];
+            data[0] = 1;
+            data[1] = (byte)usernameBytes.Length;
+            Buffer.BlockCopy(usernameBytes, 0, data, 2, usernameBytes.Length);
             udpClient.Send(data, data.Length);
             udpClient.Dispose();
-            Task ListenSomeUDP = Task.Factory.StartNew(MakeConnectionWithHost);
             isConnected = true;
             DisplayThisConnected();
         }
@@ -69,83 +76,72 @@ namespace LocalChat
             while (isConnected)
             {
                 IPEndPoint remoteIP = null;
-                try
+                var recievedData = udpListener.Receive(ref remoteIP);
+                var user = new User();
+                user.hostInfo.IPEndPoint = remoteIP;
+                if (recievedData[0] == 1)
                 {
-                    var someUserData = udpListener.Receive(ref remoteIP);
-                    var user = new User();
+                    var usernameLength = recievedData[1];
+                    var data = new byte[usernameLength];
+                    Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
+                    user.hostInfo.Username = Encoding.Unicode.GetString(data);
                     user.hostInfo.IPEndPoint = remoteIP;
-                    user.hostInfo.Username = Encoding.Unicode.GetString(someUserData);
-                    DisplayDebugInfo("ПОДКЛЮЧИЛСЯ ПОЛЬЗОВАТЕЛЬ:");
-                    DisplayDebugInfo("USERNAME = " + user.hostInfo.Username);
-                    DisplayDebugInfo("IP = " + user.hostInfo.Address);
-                    user.hostInfo.TCPSendingToPort = SendPortAndUsername(user.hostInfo);
-                    DisplayDebugInfo("Ему отправлен порт: " + user.hostInfo.TCPSendingToPort);
+                    user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
                     user.ConnectAsServer();
                     users.Add(user);
-                    DisplayUserConnected(user.hostInfo.Username);
                     Task.Factory.StartNew(() => ListenTCP(user));
                 }
-                catch { }
+                else if (recievedData[0]==2)
+                {
+                    byte[] ipBytes = new byte[4];
+                    Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
+                    if (localIPAdress==new IPAddress(ipBytes))
+                    {
+                        user.hostInfo.IPEndPoint = remoteIP;
+                        user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
+                        var usernamebytes = new byte[recievedData[6]];
+                        Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
+                        user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
+                        user.ConnectAsClient();
+                        users.Add(user);
+                        Task.Factory.StartNew(() => ListenTCP(user));
+                    }
+                }
             }
             udpListener.Dispose();
         }
 
-        /*  Формат пакета UDP (от слушающего узла):
-            0 байт: номер порт слушающего узла для установления TCP
-            1 байт: длина имени узла
-            2-... байты: имя узла
-        */
-        // Отправляет имя узла и номер свободного порта подключающемуся узлу
-        // Возвращаемое значение - фактический номер свободного порта этого узла для TCP соединения
-        private int SendPortAndUsername(HostInfo user)
+        /* Формат широковещательного UDP пакета:
+                0 байт: Тип сообщения
+                    1 - Новый пользователь сообщает о себе
+                    2 - Попытка связи с новым пользователем
+           Если 0 байт = 1:
+                1 байт: длина имени пользователя
+              2-n байт: имя пользователя
+           Если 0 байт = 2:
+                1-4 байты: IP адресс того, к кому хотят подключится
+                5 байт: номер порта для TCP соединения
+                6 байт: длина имени пользователя
+              7-n байт: имя пользователя
+*/
+        // Отправляет порт и имя данного узла новому пользователю
+        // Возвращает номер свободного порта текущего узла
+        private int SendPortAndUsernameToRemoteHost(User user)
         {
-            var udpPortThrower = new UdpClient();
-            var nicknameBytes = Encoding.Unicode.GetBytes(username);
-            byte usernameLength = (byte)nicknameBytes.Length;
-            var data = new byte[2 + usernameLength];
-            byte AvailablePort = FindAvailablePort();
-            data[0] = AvailablePort;
-            data[1] = usernameLength;
-            Buffer.BlockCopy(nicknameBytes, 0, data, 2, usernameLength);
-            udpPortThrower.Send(data, data.Length, new IPEndPoint(user.Address, (int)UDP_NEW_RECEIVE_PORT_AND_USERNAME));
-            udpPortThrower.Close();
-            return (int)TCP_OFFSET_RECEIVING_PORTS + AvailablePort;
-        }
-
-        /*  Формат пакета UDP (от слушающего узла):
-            0 байт: номер порт слушающего узла для установления TCP
-            1 байт: длина имени узла
-            2-... байты: имя узла
-        */
-        // Прием свободного порта и имени существующего узла
-        private HostInfo RecivePortAndUsername()
-        {
-            var user = new HostInfo();
-            var udpListenPort = new UdpClient((int)UDP_NEW_RECEIVE_PORT_AND_USERNAME);
-            IPEndPoint remoteIP = null;
-            var data = udpListenPort.Receive(ref remoteIP);
-            udpListenPort.Dispose();
-            user.IPEndPoint = remoteIP;
-            user.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + data[0];
-            var thisUsernameLength = data[1];
-            var thisUsername = new byte[thisUsernameLength];
-            Buffer.BlockCopy(data, 2, thisUsername, 0, thisUsernameLength);
-            user.Username = Encoding.Unicode.GetString(thisUsername);
-            return user;
-        }
-
-        // Установка соединения с конкретным работающим узлом
-        private void MakeConnectionWithHost()
-        {
-            for (; ; )
-            {
-                var user = new User();
-                user.hostInfo = RecivePortAndUsername();
-                user.ConnectAsClient();
-                users.Add(user);
-                Task.Factory.StartNew(() => ListenTCP(user));
-            }
-
+            var udpClient = new UdpClient(BROADCAST_ADDRESS, (int)UDP_BROADCAST_PORT);
+            udpClient.EnableBroadcast = true;
+            var usernameBytes = Encoding.Unicode.GetBytes(username);
+            var usernameLength = usernameBytes.Length;
+            var data = new byte[7 + usernameLength];
+            data[0] = 2;
+            Buffer.BlockCopy(localIPAdress.GetAddressBytes(), 0, data, 1, 4);
+            byte availablePort = FindAvailablePort();
+            data[5] = availablePort;
+            data[6] = (byte)usernameLength;
+            Buffer.BlockCopy(usernameBytes, 0, data, 7, usernameLength);
+            udpClient.Send(data, data.Length);
+            udpClient.Dispose();
+            return availablePort;
         }
 
         // Слушать TCP
@@ -202,6 +198,37 @@ namespace LocalChat
             users.Clear();
         }
 
+        public MainForm()
+        {
+            InitializeComponent();
+            for (int i = 0; i < NUM_OF_AVAILABLE_PORTS; i++)
+            {
+                availablePorts[i] = true;
+            }
+            PrepareComponentsDisconnectedMode();
+            var random = new Random();
+            username = "User#" + random.Next(1, 1000);
+            localIPAdress = LocalIPAddress();
+        }
+
+        // Подготовка интерфейса к режиму с соединением
+        private void PrepareComponentsConnectedMode()
+        {
+            btnConnect.Enabled = false;
+            btnDisconnect.Enabled = true;
+            btnSend.Enabled = true;
+            txtMessage.Enabled = true;
+        }
+
+        // Подготовка интерфейса к режиму без соединения
+        private void PrepareComponentsDisconnectedMode()
+        {
+            btnConnect.Enabled = true;
+            btnDisconnect.Enabled = false;
+            btnSend.Enabled = false;
+            txtMessage.Enabled = false;
+        }
+
         // Поиск номера свободного порта
         private byte FindAvailablePort()
         {
@@ -229,9 +256,9 @@ namespace LocalChat
         private void DisplayAMessage(String message, String username)
         {
             this.Invoke(new MethodInvoker(() =>
-                {
-                    txtMessageHistory.Text += ShowTime() + username + ": " + message + "\n";
-                }));
+            {
+                txtMessageHistory.Text += ShowTime() + username + ": " + message + "\n";
+            }));
         }
 
         // Отобразить изменение имени пользователя
@@ -278,34 +305,18 @@ namespace LocalChat
             return returnValue;
         }
 
-        public MainForm()
+        // Возвращает локальный IP адрес
+        private IPAddress LocalIPAddress()
         {
-            InitializeComponent();
-            for (int i = 0; i < NUM_OF_AVAILABLE_PORTS; i++)
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
             {
-                availablePorts[i] = true;
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip;
+                }
             }
-            PrepareComponentsDisconnectedMode();
-            var random = new Random();
-            username = "User#" + random.Next(1, 1000);
-        }
-
-        // Подготовка интерфейса к режиму с соединением
-        private void PrepareComponentsConnectedMode()
-        {
-            btnConnect.Enabled = false;
-            btnDisconnect.Enabled = true;
-            btnSend.Enabled = true;
-            txtMessage.Enabled = true;
-        }
-
-        // Подготовка интерфейса к режиму без соединения
-        private void PrepareComponentsDisconnectedMode()
-        {
-            btnConnect.Enabled = true;
-            btnDisconnect.Enabled = false;
-            btnSend.Enabled = false;
-            txtMessage.Enabled = false;
+            return null;
         }
 
         private void btnAcceptName_Click(object sender, EventArgs e)
@@ -325,7 +336,7 @@ namespace LocalChat
         private void btnConnect_Click(object sender, EventArgs e)
         {
             PrepareComponentsConnectedMode();
-            Task connect = Task.Factory.StartNew(MakeConnection);
+            SendBroadcastMessage();
             Task listen = Task.Factory.StartNew(ListenBroadcastUDP);
         }
 
