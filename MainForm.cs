@@ -124,7 +124,7 @@ namespace LocalChat
             var udpListenPort = new UdpClient((int)UDP_NEW_RECEIVE_PORT_AND_USERNAME);
             IPEndPoint remoteIP = null;
             var data = udpListenPort.Receive(ref remoteIP);
-            udpListenPort.Close();
+            udpListenPort.Dispose();
             user.IPEndPoint = remoteIP;
             user.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + data[0];
             var thisUsernameLength = data[1];
