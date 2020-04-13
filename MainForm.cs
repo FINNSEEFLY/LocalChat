@@ -26,15 +26,16 @@ namespace LocalChat
         */
         /* Формат широковещательного UDP пакета:
                 0 байт: Тип сообщения
-                        1 - Новый пользователь сообщает о себе
-                        2 - Попытка связи с новым пользователем
+                    1 - Новый пользователь сообщает о себе
+                    2 - Попытка связи с новым пользователем
            Если 0 байт = 1:
                 1 байт: длина имени пользователя
-                n байт: имя пользователя
+              2-n байт: имя пользователя
            Если 0 байт = 2:
                 1-4 байты: IP адресс того, к кому хотят подключится
                 5 байт: номер порта для TCP соединения
-                6 байт: 
+                6 байт: длина имени пользователя
+              7-n байт: имя пользователя
         */
         private const byte NUM_OF_AVAILABLE_PORTS = 255;
         private const UInt32 TCP_OFFSET_RECEIVING_PORTS = 12000;
@@ -68,6 +69,19 @@ namespace LocalChat
             DisplayThisConnected();
         }
 
+        /* Формат широковещательного UDP пакета:
+                0 байт: Тип сообщения
+                    1 - Новый пользователь сообщает о себе
+                    2 - Попытка связи с новым пользователем
+           Если 0 байт = 1:
+                1 байт: длина имени пользователя
+                2-n байт: имя пользователя
+           Если 0 байт = 2:
+                1-4 байты: IP адресс того, к кому хотят подключится
+                5 байт: номер порта для TCP соединения
+                6 байт: длина имени пользователя
+                7-n байт: имя пользователя
+        */
         // Прослушивание UDP на случай появления нового узла
         private void ListenBroadcastUDP()
         {
@@ -123,7 +137,7 @@ namespace LocalChat
                 5 байт: номер порта для TCP соединения
                 6 байт: длина имени пользователя
               7-n байт: имя пользователя
-*/
+        */
         // Отправляет порт и имя данного узла новому пользователю
         // Возвращает номер свободного порта текущего узла
         private int SendPortAndUsernameToRemoteHost(User user)
@@ -209,6 +223,7 @@ namespace LocalChat
             var random = new Random();
             username = "User#" + random.Next(1, 1000);
             localIPAdress = LocalIPAddress();
+            Task listen = Task.Factory.StartNew(ListenBroadcastUDP);
         }
 
         // Подготовка интерфейса к режиму с соединением
@@ -337,7 +352,6 @@ namespace LocalChat
         {
             PrepareComponentsConnectedMode();
             SendBroadcastMessage();
-            Task listen = Task.Factory.StartNew(ListenBroadcastUDP);
         }
 
         private void btnDisconnect_Click(object sender, EventArgs e)
