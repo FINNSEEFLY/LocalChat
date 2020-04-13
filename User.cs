@@ -31,6 +31,18 @@ namespace LocalChat
         public TcpClient tcpClient;
         public TcpListener tcpListener;
         public NetworkStream stream;
+        public int PortWithConnection { get
+            {
+                if (hostInfo.TCPReceivingFromPort != 0)
+                {
+                    return hostInfo.TCPReceivingFromPort;
+                }
+                else if (hostInfo.TCPSendingToPort != 0)
+                {
+                    return hostInfo.TCPSendingToPort;
+                }
+                else throw new Exception();
+            } }
         public bool Listen { get; set; } = true;
         
         public void ConnectAsServer()

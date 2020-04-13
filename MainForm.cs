@@ -179,6 +179,7 @@ namespace LocalChat
                             break;
                         case TYPE_DISCONNECT:
                             DisplayUserDisconnected(user.hostInfo.Username);
+                            availablePorts[user.PortWithConnection - TCP_OFFSET_RECEIVING_PORTS] = true;
                             users.Remove(user);
                             user.Dispose();
                             user.Listen = false;

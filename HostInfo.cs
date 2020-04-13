@@ -18,7 +18,7 @@ namespace LocalChat
             }
         }
         public String Username { get; set; }
-        public int TCPReceivingFromPort { get; set; }
-        public int TCPSendingToPort { get; set; }
+        public int TCPReceivingFromPort { get; set; } = 0;
+        public int TCPSendingToPort { get; set; } = 0;
     }
 }
