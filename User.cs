@@ -35,7 +35,7 @@ namespace LocalChat
         
         public void ConnectAsServer()
         {
-            tcpListener = new TcpListener(hostInfo.Address,hostInfo.TCPSendingToPort);
+            tcpListener = new TcpListener(hostInfo.Address,hostInfo.TCPReceivingFromPort);
             tcpListener.Start();
             tcpClient = tcpListener.AcceptTcpClient();
             tcpListener.Stop();
@@ -44,7 +44,7 @@ namespace LocalChat
         }
         public void ConnectAsClient()
         {
-            tcpClient = new TcpClient(new IPEndPoint(hostInfo.Address, hostInfo.TCPReceivingFromPort));
+            tcpClient = new TcpClient(new IPEndPoint(hostInfo.Address, hostInfo.TCPSendingToPort));
             stream = tcpClient.GetStream();
             tcpClient.ReceiveTimeout = 500;
         }
