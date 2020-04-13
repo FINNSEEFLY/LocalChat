@@ -103,6 +103,7 @@ namespace LocalChat
                     user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
                     user.ConnectAsServer();
                     users.Add(user);
+                    DisplayUserConnected(user.hostInfo.Username);
                     Task.Factory.StartNew(() => ListenTCP(user));
                 }
                 else if (recievedData[0]==2)
@@ -118,6 +119,7 @@ namespace LocalChat
                         user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
                         user.ConnectAsClient();
                         users.Add(user);
+                        DisplayUserConnected(user.hostInfo.Username);
                         Task.Factory.StartNew(() => ListenTCP(user));
                     }
                 }
