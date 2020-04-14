@@ -45,14 +45,11 @@ namespace LocalChat
             } }
         public bool Listen { get; set; } = true;
         
-        public void ConnectAsServer()
+        public void ConnectAsServer(IPAddress localip)
         {
-            tcpListener = new TcpListener(new IPEndPoint(hostInfo.Address, hostInfo.TCPSendingToPort));
+            tcpListener = new TcpListener(localip,hostInfo.TCPSendingToPort);
             tcpListener.Start();
-            if (tcpListener.Pending())
-            {
-                tcpClient = tcpListener.AcceptTcpClient();
-            }
+            tcpClient = tcpListener.AcceptTcpClient();
             stream = tcpClient.GetStream();
             tcpClient.ReceiveTimeout = 500;
         }

@@ -110,7 +110,7 @@ namespace LocalChat
                             DisplayDebugInfo("Отправил порт к " + user.hostInfo.Address);
                             user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
                             DisplayDebugInfo("Готов к подключению через " + user.hostInfo.TCPSendingToPort);
-                            user.ConnectAsServer();
+                            user.ConnectAsServer(localIPAdress);
                             users.Add(user);
                             DisplayUserConnected(user.hostInfo.Username);
                             DisplayDebugInfo("Слушаю TCP");
