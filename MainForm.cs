@@ -315,6 +315,15 @@ namespace LocalChat
             }));
         }
 
+        // Отправить сообщение
+        private void SendMessage()
+        {
+            var message = txtMessage.Text;
+            SendMessageByTCP(message);
+            txtMessageHistory.Text += ShowTime() + username + ": " + message + "\n";
+            txtMessage.Text = "";
+        }
+
         // Возвращает время в нужном формате в виде строки
         private String ShowTime()
         {
@@ -372,15 +381,20 @@ namespace LocalChat
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            var message = txtMessage.Text;
-            SendMessageByTCP(message);
-            txtMessageHistory.Text += ShowTime() + username + ": " + message + "\n";
-            txtMessage.Text = "";
+            SendMessage();
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Disconnect();
+        }
+
+        private void txtMessage_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode==Keys.Enter)
+            {
+                SendMessage();
+            }
         }
     }
 }
