@@ -57,7 +57,7 @@
             this.pnlControlArea.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlControlArea.Location = new System.Drawing.Point(0, 0);
             this.pnlControlArea.Name = "pnlControlArea";
-            this.pnlControlArea.Size = new System.Drawing.Size(230, 470);
+            this.pnlControlArea.Size = new System.Drawing.Size(230, 471);
             this.pnlControlArea.TabIndex = 0;
             // 
             // btnConnect
@@ -65,7 +65,7 @@
             this.btnConnect.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.btnConnect.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnConnect.Location = new System.Drawing.Point(0, 339);
+            this.btnConnect.Location = new System.Drawing.Point(0, 340);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(228, 43);
             this.btnConnect.TabIndex = 3;
@@ -78,7 +78,7 @@
             this.btnDisconnect.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.btnDisconnect.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnDisconnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnDisconnect.Location = new System.Drawing.Point(0, 382);
+            this.btnDisconnect.Location = new System.Drawing.Point(0, 383);
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(228, 43);
             this.btnDisconnect.TabIndex = 2;
@@ -135,7 +135,7 @@
             this.btnExit.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnExit.Location = new System.Drawing.Point(0, 425);
+            this.btnExit.Location = new System.Drawing.Point(0, 426);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(228, 43);
             this.btnExit.TabIndex = 0;
@@ -151,7 +151,7 @@
             this.pnlChatArea.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlChatArea.Location = new System.Drawing.Point(230, 0);
             this.pnlChatArea.Name = "pnlChatArea";
-            this.pnlChatArea.Size = new System.Drawing.Size(618, 470);
+            this.pnlChatArea.Size = new System.Drawing.Size(619, 471);
             this.pnlChatArea.TabIndex = 1;
             // 
             // txtMessageHistory
@@ -163,7 +163,7 @@
             this.txtMessageHistory.Location = new System.Drawing.Point(0, 0);
             this.txtMessageHistory.Name = "txtMessageHistory";
             this.txtMessageHistory.ReadOnly = true;
-            this.txtMessageHistory.Size = new System.Drawing.Size(616, 441);
+            this.txtMessageHistory.Size = new System.Drawing.Size(617, 442);
             this.txtMessageHistory.TabIndex = 1;
             this.txtMessageHistory.Text = "";
             // 
@@ -173,9 +173,9 @@
             this.pnlChatControlArea.Controls.Add(this.txtMessage);
             this.pnlChatControlArea.Controls.Add(this.btnSend);
             this.pnlChatControlArea.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlChatControlArea.Location = new System.Drawing.Point(0, 441);
+            this.pnlChatControlArea.Location = new System.Drawing.Point(0, 442);
             this.pnlChatControlArea.Name = "pnlChatControlArea";
-            this.pnlChatControlArea.Size = new System.Drawing.Size(616, 27);
+            this.pnlChatControlArea.Size = new System.Drawing.Size(617, 27);
             this.pnlChatControlArea.TabIndex = 0;
             // 
             // txtMessage
@@ -184,7 +184,7 @@
             this.txtMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.txtMessage.Location = new System.Drawing.Point(0, 0);
             this.txtMessage.Name = "txtMessage";
-            this.txtMessage.Size = new System.Drawing.Size(499, 26);
+            this.txtMessage.Size = new System.Drawing.Size(500, 26);
             this.txtMessage.TabIndex = 1;
             this.txtMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyDown);
             // 
@@ -193,7 +193,7 @@
             this.btnSend.Dock = System.Windows.Forms.DockStyle.Right;
             this.btnSend.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnSend.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnSend.Location = new System.Drawing.Point(499, 0);
+            this.btnSend.Location = new System.Drawing.Point(500, 0);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(115, 25);
             this.btnSend.TabIndex = 0;
@@ -206,9 +206,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(848, 470);
+            this.ClientSize = new System.Drawing.Size(849, 471);
             this.Controls.Add(this.pnlChatArea);
             this.Controls.Add(this.pnlControlArea);
+            this.MinimumSize = new System.Drawing.Size(480, 290);
             this.Name = "MainForm";
             this.Text = "LocalChat";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
