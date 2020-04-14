@@ -121,7 +121,7 @@ namespace LocalChat
                         Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
                         var ipInPacket = new IPAddress(ipBytes);
                                 DisplayDebugInfo("Мой IP: " + localIPAdress + " IP в пакете: " + ipInPacket);
-                        if (localIPAdress == ipInPacket)
+                        if (localIPAdress.ToString() == ipInPacket.ToString())
                         {
                             user.hostInfo.IPEndPoint = remoteIP;
                                  DisplayDebugInfo("Получен broadcast пакет от " + user.hostInfo.Address);
@@ -165,7 +165,7 @@ namespace LocalChat
             var usernameLength = usernameBytes.Length;
             var data = new byte[7 + usernameLength];
             data[0] = 2;
-            Buffer.BlockCopy(localIPAdress.GetAddressBytes(), 0, data, 1, 4);
+            Buffer.BlockCopy(user.hostInfo.Address.GetAddressBytes(), 0, data, 1, 4);
             byte availablePort = FindAvailablePort();
             data[5] = availablePort;
             data[6] = (byte)usernameLength;
