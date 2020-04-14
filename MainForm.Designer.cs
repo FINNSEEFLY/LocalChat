@@ -41,6 +41,7 @@
             this.pnlChatControlArea = new System.Windows.Forms.Panel();
             this.txtMessage = new System.Windows.Forms.TextBox();
             this.btnSend = new System.Windows.Forms.Button();
+            this.btnClearHistory = new System.Windows.Forms.Button();
             this.pnlControlArea.SuspendLayout();
             this.pnlNameArea.SuspendLayout();
             this.pnlChatArea.SuspendLayout();
@@ -50,6 +51,7 @@
             // pnlControlArea
             // 
             this.pnlControlArea.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlControlArea.Controls.Add(this.btnClearHistory);
             this.pnlControlArea.Controls.Add(this.btnConnect);
             this.pnlControlArea.Controls.Add(this.btnDisconnect);
             this.pnlControlArea.Controls.Add(this.pnlNameArea);
@@ -201,6 +203,19 @@
             this.btnSend.UseVisualStyleBackColor = true;
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             // 
+            // btnClearHistory
+            // 
+            this.btnClearHistory.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnClearHistory.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnClearHistory.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnClearHistory.Location = new System.Drawing.Point(0, 297);
+            this.btnClearHistory.Name = "btnClearHistory";
+            this.btnClearHistory.Size = new System.Drawing.Size(228, 43);
+            this.btnClearHistory.TabIndex = 4;
+            this.btnClearHistory.Text = "Очистить историю";
+            this.btnClearHistory.UseVisualStyleBackColor = true;
+            this.btnClearHistory.Click += new System.EventHandler(this.btnClearHistory_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -209,7 +224,7 @@
             this.ClientSize = new System.Drawing.Size(849, 471);
             this.Controls.Add(this.pnlChatArea);
             this.Controls.Add(this.pnlControlArea);
-            this.MinimumSize = new System.Drawing.Size(480, 290);
+            this.MinimumSize = new System.Drawing.Size(480, 335);
             this.Name = "MainForm";
             this.Text = "LocalChat";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
@@ -238,6 +253,7 @@
         private System.Windows.Forms.TextBox txtMessage;
         private System.Windows.Forms.Button btnSend;
         private System.Windows.Forms.RichTextBox txtMessageHistory;
+        private System.Windows.Forms.Button btnClearHistory;
     }
 }
 

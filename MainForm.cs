@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Sockets;
 using System.Net;
+using System.IO;
 
 namespace LocalChat
 {
@@ -92,38 +93,55 @@ namespace LocalChat
                 while (isConnected)
                 {
                     IPEndPoint remoteIP = null;
+                                DisplayDebugInfo("Слушаю UDPBroadcast");
                     var recievedData = udpListener.Receive(ref remoteIP);
-                    var user = new User();
-                    user.hostInfo.IPEndPoint = remoteIP;
                     if (recievedData[0] == 1)
                     {
-                        var usernameLength = recievedData[1];
-                        var data = new byte[usernameLength];
-                        Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
-                        user.hostInfo.Username = Encoding.Unicode.GetString(data);
-                        user.hostInfo.IPEndPoint = remoteIP;
-                        user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
-                        user.ConnectAsServer();
-                        users.Add(user);
-                        DisplayUserConnected(user.hostInfo.Username);
-                        Task.Factory.StartNew(() => ListenTCP(user));
+                        if (remoteIP.Address.ToString() != localIPAdress.ToString())
+                        {
+                            var user = new User();
+                            user.hostInfo.IPEndPoint = remoteIP;
+                            DisplayDebugInfo("Получил UDPBroadcast пакет от нового пользователя");
+                            var usernameLength = recievedData[1];
+                            var data = new byte[usernameLength];
+                            Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
+                            user.hostInfo.Username = Encoding.Unicode.GetString(data);
+                            user.hostInfo.IPEndPoint = remoteIP;
+                            DisplayDebugInfo("Отправил порт к " + user.hostInfo.Address);
+                            user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
+                            DisplayDebugInfo("Готов к подключению через " + user.hostInfo.TCPSendingToPort);
+                            user.ConnectAsServer();
+                            users.Add(user);
+                            DisplayUserConnected(user.hostInfo.Username);
+                            DisplayDebugInfo("Слушаю TCP");
+                            Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                        }
+
                     }
                     else if (recievedData[0] == 2)
                     {
+                        var user = new User();
+                        user.hostInfo.IPEndPoint = remoteIP;
+                            DisplayDebugInfo("Получил UDPBroadcast пакет с портом");
                         byte[] ipBytes = new byte[4];
                         Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
-                        if (localIPAdress == new IPAddress(ipBytes))
+                        var ipInPacket = new IPAddress(ipBytes);
+                                DisplayDebugInfo("Мой IP: " + localIPAdress + " IP в пакете: " + ipInPacket);
+                        if (localIPAdress.ToString() == ipInPacket.ToString())
                         {
                             user.hostInfo.IPEndPoint = remoteIP;
+                                 DisplayDebugInfo("Получен broadcast пакет от " + user.hostInfo.Address);
                             user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
                             var usernamebytes = new byte[recievedData[6]];
                             Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
                             user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
+                                DisplayDebugInfo("Соединяюсь с " + user.hostInfo.Username);
                             user.ConnectAsClient();
                             users.Add(user);
-                            DisplayUserConnected(user.hostInfo.Username);
-                            Task.Factory.StartNew(() => ListenTCP(user));
+                                DisplayUserConnected(user.hostInfo.Username);
+                            Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
                         }
+                        else DisplayDebugInfo("Не мне");
                     }
                 }
                 udpListener.Dispose();
@@ -153,7 +171,7 @@ namespace LocalChat
             var usernameLength = usernameBytes.Length;
             var data = new byte[7 + usernameLength];
             data[0] = 2;
-            Buffer.BlockCopy(localIPAdress.GetAddressBytes(), 0, data, 1, 4);
+            Buffer.BlockCopy(user.hostInfo.Address.GetAddressBytes(), 0, data, 1, 4);
             byte availablePort = FindAvailablePort();
             data[5] = availablePort;
             data[6] = (byte)usernameLength;
@@ -221,14 +239,22 @@ namespace LocalChat
         public MainForm()
         {
             InitializeComponent();
-            for (int i = 0; i < NUM_OF_AVAILABLE_PORTS; i++)
-            {
-                availablePorts[i] = true;
-            }
+            InitializeAvailablePorts();
             PrepareComponentsDisconnectedMode();
             var random = new Random();
             username = "User#" + random.Next(1, 1000);
             localIPAdress = LocalIPAddress();
+            if (File.Exists("ChatLog"))
+            {
+                var streamReader = new StreamReader("ChatLog");
+                txtMessageHistory.Text = streamReader.ReadToEnd();
+                streamReader.Close();
+                streamReader.Dispose();
+            }
+            else
+            {
+                File.Create("ChatLog").Dispose();
+            }
             Task listen = Task.Factory.StartNew(ListenBroadcastUDP);
         }
 
@@ -309,6 +335,15 @@ namespace LocalChat
             }));
         }
 
+        // Отобразить сообщение о том, что вы подключились
+        private void DisplayThisDisconnected()
+        {
+            this.Invoke(new MethodInvoker(() =>
+            {
+                txtMessageHistory.Text += ShowTime() + "Вы отключились"+"\n";
+            }));
+        }
+
         // Отобразить сообщение о том, что пользователь подключился
         private void DisplayUserConnected(String username)
         {
@@ -361,6 +396,35 @@ namespace LocalChat
             return null;
         }
 
+        // Инициализирует доступные порты
+        private void InitializeAvailablePorts()
+        {
+            for (int i = 0; i<NUM_OF_AVAILABLE_PORTS;i++)
+            {
+                availablePorts[i] = true;
+            }
+        }
+
+        // Завершение работы программы
+        private void SaveLog()
+        {
+            if (!File.Exists("ChatLog"))
+            {
+                File.Create("ChatLog").Dispose();
+            }
+            var streamWriter = new StreamWriter("ChatLog");
+            streamWriter.Write(txtMessageHistory.Text);
+            streamWriter.Close();
+            streamWriter.Dispose();
+        }
+
+        // Очистка истории сообщений
+        private void ClearHistory()
+        {
+            txtMessageHistory.Text = "";
+            SaveLog();
+        }
+
         private void btnAcceptName_Click(object sender, EventArgs e)
         {
             var random = new Random();
@@ -386,11 +450,14 @@ namespace LocalChat
             PrepareComponentsDisconnectedMode();
             Disconnect();
             isConnected = false;
+            InitializeAvailablePorts();
+            DisplayThisDisconnected();
         }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
             Disconnect();
+            SaveLog();
             Close();
         }
 
@@ -402,6 +469,7 @@ namespace LocalChat
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Disconnect();
+            SaveLog();
         }
 
         private void txtMessage_KeyDown(object sender, KeyEventArgs e)
@@ -410,6 +478,11 @@ namespace LocalChat
             {
                 SendMessage();
             }
+        }
+
+        private void btnClearHistory_Click(object sender, EventArgs e)
+        {
+            ClearHistory();
         }
     }
 }
