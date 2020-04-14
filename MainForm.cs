@@ -39,9 +39,9 @@ namespace LocalChat
               7-n байт: имя пользователя
         */
         private const byte NUM_OF_AVAILABLE_PORTS = 255;
-        private const UInt32 TCP_OFFSET_RECEIVING_PORTS = 12000;
-        private const UInt32 UDP_BROADCAST_PORT = 1337;
-        private const UInt32 UDP_NEW_RECEIVE_PORT_AND_USERNAME = 11004;
+        private const UInt32 TCP_OFFSET_RECEIVING_PORTS = 22200;
+        private const UInt32 UDP_BROADCAST_PORT = 31576;
+        private const UInt32 UDP_NEW_RECEIVE_PORT_AND_USERNAME = 32648;
         private const byte TYPE_MESSAGE = 1;
         private const byte TYPE_CHANGE_NAME = 2;
         private const byte TYPE_DISCONNECT = 3;

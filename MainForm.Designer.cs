@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.pnlControlArea = new System.Windows.Forms.Panel();
+            this.btnClearHistory = new System.Windows.Forms.Button();
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnDisconnect = new System.Windows.Forms.Button();
             this.pnlNameArea = new System.Windows.Forms.Panel();
@@ -41,7 +42,6 @@
             this.pnlChatControlArea = new System.Windows.Forms.Panel();
             this.txtMessage = new System.Windows.Forms.TextBox();
             this.btnSend = new System.Windows.Forms.Button();
-            this.btnClearHistory = new System.Windows.Forms.Button();
             this.pnlControlArea.SuspendLayout();
             this.pnlNameArea.SuspendLayout();
             this.pnlChatArea.SuspendLayout();
@@ -61,6 +61,19 @@
             this.pnlControlArea.Name = "pnlControlArea";
             this.pnlControlArea.Size = new System.Drawing.Size(230, 471);
             this.pnlControlArea.TabIndex = 0;
+            // 
+            // btnClearHistory
+            // 
+            this.btnClearHistory.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btnClearHistory.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnClearHistory.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnClearHistory.Location = new System.Drawing.Point(0, 297);
+            this.btnClearHistory.Name = "btnClearHistory";
+            this.btnClearHistory.Size = new System.Drawing.Size(228, 43);
+            this.btnClearHistory.TabIndex = 2;
+            this.btnClearHistory.Text = "Очистить историю";
+            this.btnClearHistory.UseVisualStyleBackColor = true;
+            this.btnClearHistory.Click += new System.EventHandler(this.btnClearHistory_Click);
             // 
             // btnConnect
             // 
@@ -83,7 +96,7 @@
             this.btnDisconnect.Location = new System.Drawing.Point(0, 383);
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(228, 43);
-            this.btnDisconnect.TabIndex = 2;
+            this.btnDisconnect.TabIndex = 4;
             this.btnDisconnect.Text = "Отключится";
             this.btnDisconnect.UseVisualStyleBackColor = true;
             this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
@@ -107,7 +120,7 @@
             this.btnAcceptName.Location = new System.Drawing.Point(0, 86);
             this.btnAcceptName.Name = "btnAcceptName";
             this.btnAcceptName.Size = new System.Drawing.Size(228, 36);
-            this.btnAcceptName.TabIndex = 2;
+            this.btnAcceptName.TabIndex = 1;
             this.btnAcceptName.Text = "Подтвердить имя";
             this.btnAcceptName.UseVisualStyleBackColor = true;
             this.btnAcceptName.Click += new System.EventHandler(this.btnAcceptName_Click);
@@ -118,7 +131,7 @@
             this.txtNickname.Location = new System.Drawing.Point(0, 39);
             this.txtNickname.Name = "txtNickname";
             this.txtNickname.Size = new System.Drawing.Size(228, 24);
-            this.txtNickname.TabIndex = 1;
+            this.txtNickname.TabIndex = 0;
             // 
             // lblYourNickname
             // 
@@ -140,7 +153,7 @@
             this.btnExit.Location = new System.Drawing.Point(0, 426);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(228, 43);
-            this.btnExit.TabIndex = 0;
+            this.btnExit.TabIndex = 5;
             this.btnExit.Text = "Выход";
             this.btnExit.UseVisualStyleBackColor = true;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
@@ -187,7 +200,7 @@
             this.txtMessage.Location = new System.Drawing.Point(0, 0);
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.Size = new System.Drawing.Size(500, 26);
-            this.txtMessage.TabIndex = 1;
+            this.txtMessage.TabIndex = 0;
             this.txtMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyDown);
             // 
             // btnSend
@@ -198,23 +211,10 @@
             this.btnSend.Location = new System.Drawing.Point(500, 0);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(115, 25);
-            this.btnSend.TabIndex = 0;
+            this.btnSend.TabIndex = 1;
             this.btnSend.Text = "Отправить";
             this.btnSend.UseVisualStyleBackColor = true;
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
-            // 
-            // btnClearHistory
-            // 
-            this.btnClearHistory.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.btnClearHistory.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.btnClearHistory.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnClearHistory.Location = new System.Drawing.Point(0, 297);
-            this.btnClearHistory.Name = "btnClearHistory";
-            this.btnClearHistory.Size = new System.Drawing.Size(228, 43);
-            this.btnClearHistory.TabIndex = 4;
-            this.btnClearHistory.Text = "Очистить историю";
-            this.btnClearHistory.UseVisualStyleBackColor = true;
-            this.btnClearHistory.Click += new System.EventHandler(this.btnClearHistory_Click);
             // 
             // MainForm
             // 
