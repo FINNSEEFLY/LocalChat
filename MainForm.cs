@@ -106,11 +106,11 @@ namespace LocalChat
                     DisplayUserConnected(user.hostInfo.Username);
                     Task.Factory.StartNew(() => ListenTCP(user));
                 }
-                else if (recievedData[0]==2)
+                else if (recievedData[0] == 2)
                 {
                     byte[] ipBytes = new byte[4];
                     Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
-                    if (localIPAdress==new IPAddress(ipBytes))
+                    if (localIPAdress == new IPAddress(ipBytes))
                     {
                         user.hostInfo.IPEndPoint = remoteIP;
                         user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
@@ -328,7 +328,19 @@ namespace LocalChat
         private String ShowTime()
         {
             var thisMoment = DateTime.Now;
-            String returnValue = "[" + thisMoment.Hour + ":" + thisMoment.Minute + ":" + thisMoment.Second + "] ";
+            String returnValue = "[";
+            if (thisMoment.Hour < 10)
+                returnValue += "0" + thisMoment.Hour + ":";
+            else
+                returnValue += thisMoment.Hour + ":";
+            if (thisMoment.Minute < 10)
+                returnValue += "0" + thisMoment.Minute + ":";
+            else
+                returnValue += thisMoment.Minute + ":";
+            if (thisMoment.Second < 10)
+                returnValue += "0" + thisMoment.Second + "] ";
+            else
+                returnValue += thisMoment.Second + "] ";
             return returnValue;
         }
 
@@ -391,7 +403,7 @@ namespace LocalChat
 
         private void txtMessage_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode==Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
             {
                 SendMessage();
             }
