@@ -85,46 +85,49 @@ namespace LocalChat
         // Прослушивание UDP на случай появления нового узла
         private void ListenBroadcastUDP()
         {
-            var udpListener = new UdpClient((int)UDP_BROADCAST_PORT);
-            udpListener.EnableBroadcast = true;
-            while (isConnected)
+            while (true)
             {
-                IPEndPoint remoteIP = null;
-                var recievedData = udpListener.Receive(ref remoteIP);
-                var user = new User();
-                user.hostInfo.IPEndPoint = remoteIP;
-                if (recievedData[0] == 1)
+                var udpListener = new UdpClient((int)UDP_BROADCAST_PORT);
+                udpListener.EnableBroadcast = true;
+                while (isConnected)
                 {
-                    var usernameLength = recievedData[1];
-                    var data = new byte[usernameLength];
-                    Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
-                    user.hostInfo.Username = Encoding.Unicode.GetString(data);
+                    IPEndPoint remoteIP = null;
+                    var recievedData = udpListener.Receive(ref remoteIP);
+                    var user = new User();
                     user.hostInfo.IPEndPoint = remoteIP;
-                    user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
-                    user.ConnectAsServer();
-                    users.Add(user);
-                    DisplayUserConnected(user.hostInfo.Username);
-                    Task.Factory.StartNew(() => ListenTCP(user));
-                }
-                else if (recievedData[0] == 2)
-                {
-                    byte[] ipBytes = new byte[4];
-                    Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
-                    if (localIPAdress == new IPAddress(ipBytes))
+                    if (recievedData[0] == 1)
                     {
+                        var usernameLength = recievedData[1];
+                        var data = new byte[usernameLength];
+                        Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
+                        user.hostInfo.Username = Encoding.Unicode.GetString(data);
                         user.hostInfo.IPEndPoint = remoteIP;
-                        user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
-                        var usernamebytes = new byte[recievedData[6]];
-                        Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
-                        user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
-                        user.ConnectAsClient();
+                        user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
+                        user.ConnectAsServer();
                         users.Add(user);
                         DisplayUserConnected(user.hostInfo.Username);
                         Task.Factory.StartNew(() => ListenTCP(user));
                     }
+                    else if (recievedData[0] == 2)
+                    {
+                        byte[] ipBytes = new byte[4];
+                        Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
+                        if (localIPAdress == new IPAddress(ipBytes))
+                        {
+                            user.hostInfo.IPEndPoint = remoteIP;
+                            user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
+                            var usernamebytes = new byte[recievedData[6]];
+                            Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
+                            user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
+                            user.ConnectAsClient();
+                            users.Add(user);
+                            DisplayUserConnected(user.hostInfo.Username);
+                            Task.Factory.StartNew(() => ListenTCP(user));
+                        }
+                    }
                 }
+                udpListener.Dispose();
             }
-            udpListener.Dispose();
         }
 
         /* Формат широковещательного UDP пакета:
