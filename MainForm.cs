@@ -461,16 +461,16 @@ namespace LocalChat
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
-            PrepareComponentsConnectedMode();
             isConnected = true;
+            PrepareComponentsConnectedMode();
             SendBroadcastMessage();
         }
 
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
             PrepareComponentsDisconnectedMode();
-            Disconnect();
             isConnected = false;
+            Disconnect();
             InitializeAvailablePorts();
             DisplayThisDisconnected();
         }
