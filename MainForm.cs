@@ -65,8 +65,7 @@ namespace LocalChat
             data[1] = (byte)usernameBytes.Length;
             Buffer.BlockCopy(usernameBytes, 0, data, 2, usernameBytes.Length);
             udpClient.Send(data, data.Length);
-            udpClient.Dispose();
-            isConnected = true;
+            udpClient.Dispose();        
             DisplayThisConnected();
         }
 
@@ -454,6 +453,7 @@ namespace LocalChat
         private void btnConnect_Click(object sender, EventArgs e)
         {
             PrepareComponentsConnectedMode();
+            isConnected = true;
             SendBroadcastMessage();
         }
 
