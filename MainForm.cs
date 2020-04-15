@@ -97,7 +97,7 @@ namespace LocalChat
                     var recievedData = udpListener.Receive(ref remoteIP);
                     if (recievedData[0] == 1)
                     {
-                        if (remoteIP.Address.ToString() != localIPAdress.ToString())
+                        if (remoteIP.Address.ToString() != localIPAdress.ToString() && (!ThisIPAlreadyExists(remoteIP.Address)))
                         {
                             var user = new User();
                             user.hostInfo.IPEndPoint = remoteIP;
@@ -416,6 +416,17 @@ namespace LocalChat
             streamWriter.Write(txtMessageHistory.Text);
             streamWriter.Close();
             streamWriter.Dispose();
+        }
+
+        // Проверяет, есть ли уже такой ip в памяти
+        private bool ThisIPAlreadyExists(IPAddress ip)
+        {
+            foreach(var thisuser in users)
+            {
+                if (thisuser.hostInfo.Address.ToString() == ip.ToString())
+                    return true;
+            }
+            return false;
         }
 
         // Очистка истории сообщений
