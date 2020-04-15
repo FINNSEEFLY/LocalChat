@@ -65,7 +65,7 @@ namespace LocalChat
             data[1] = (byte)usernameBytes.Length;
             Buffer.BlockCopy(usernameBytes, 0, data, 2, usernameBytes.Length);
             udpClient.Send(data, data.Length);
-            udpClient.Dispose();        
+            udpClient.Dispose();
             DisplayThisConnected();
         }
 
@@ -89,62 +89,59 @@ namespace LocalChat
             {
                 var udpListener = new UdpClient((int)UDP_BROADCAST_PORT);
                 udpListener.EnableBroadcast = true;
-                while (isConnected)
+                IPEndPoint remoteIP = null;
+                DisplayDebugInfo("Слушаю UDPBroadcast");
+                var recievedData = udpListener.Receive(ref remoteIP);
+                if (isConnected)
                 {
-                    IPEndPoint remoteIP = null;
-                                DisplayDebugInfo("Слушаю UDPBroadcast");
-                    var recievedData = udpListener.Receive(ref remoteIP);
-                    if (isConnected)
+                    if (recievedData[0] == 1)
                     {
-                        if (recievedData[0] == 1)
-                        {
-                            if (remoteIP.Address.ToString() != localIPAdress.ToString() && (!ThisIPAlreadyExists(remoteIP.Address)))
-                            {
-                                var user = new User();
-                                user.hostInfo.IPEndPoint = remoteIP;
-                                DisplayDebugInfo("Получил UDPBroadcast пакет от нового пользователя");
-                                var usernameLength = recievedData[1];
-                                var data = new byte[usernameLength];
-                                Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
-                                user.hostInfo.Username = Encoding.Unicode.GetString(data);
-                                user.hostInfo.IPEndPoint = remoteIP;
-                                DisplayDebugInfo("Отправил порт к " + user.hostInfo.Address);
-                                user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
-                                DisplayDebugInfo("Готов к подключению через " + user.hostInfo.TCPSendingToPort);
-                                user.ConnectAsServer(localIPAdress);
-                                users.Add(user);
-                                DisplayUserConnected(user.hostInfo.Username);
-                                DisplayDebugInfo("Слушаю TCP");
-                                Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
-                            }
-                            else if (ThisIPAlreadyExists(remoteIP.Address)) DisplayDebugInfo("А такой уже есть");
-
-                        }
-                        else if (recievedData[0] == 2)
+                        if (remoteIP.Address.ToString() != localIPAdress.ToString() && (!ThisIPAlreadyExists(remoteIP.Address)))
                         {
                             var user = new User();
                             user.hostInfo.IPEndPoint = remoteIP;
-                            DisplayDebugInfo("Получил UDPBroadcast пакет с портом");
-                            byte[] ipBytes = new byte[4];
-                            Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
-                            var ipInPacket = new IPAddress(ipBytes);
-                            DisplayDebugInfo("Мой IP: " + localIPAdress + " IP в пакете: " + ipInPacket);
-                            if (localIPAdress.ToString() == ipInPacket.ToString())
-                            {
-                                user.hostInfo.IPEndPoint = remoteIP;
-                                DisplayDebugInfo("Получен broadcast пакет от " + user.hostInfo.Address);
-                                user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
-                                var usernamebytes = new byte[recievedData[6]];
-                                Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
-                                user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
-                                DisplayDebugInfo("Соединяюсь с " + user.hostInfo.Username);
-                                user.ConnectAsClient();
-                                users.Add(user);
-                                DisplayUserConnected(user.hostInfo.Username);
-                                Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
-                            }
-                            else DisplayDebugInfo("Не мне");
+                            DisplayDebugInfo("Получил UDPBroadcast пакет от нового пользователя");
+                            var usernameLength = recievedData[1];
+                            var data = new byte[usernameLength];
+                            Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
+                            user.hostInfo.Username = Encoding.Unicode.GetString(data);
+                            user.hostInfo.IPEndPoint = remoteIP;
+                            DisplayDebugInfo("Отправил порт к " + user.hostInfo.Address);
+                            user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
+                            DisplayDebugInfo("Готов к подключению через " + user.hostInfo.TCPSendingToPort);
+                            user.ConnectAsServer(localIPAdress);
+                            users.Add(user);
+                            DisplayUserConnected(user.hostInfo.Username);
+                            DisplayDebugInfo("Слушаю TCP");
+                            Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
                         }
+                        else if (ThisIPAlreadyExists(remoteIP.Address)) DisplayDebugInfo("А такой уже есть");
+
+                    }
+                    else if (recievedData[0] == 2)
+                    {
+                        var user = new User();
+                        user.hostInfo.IPEndPoint = remoteIP;
+                        DisplayDebugInfo("Получил UDPBroadcast пакет с портом");
+                        byte[] ipBytes = new byte[4];
+                        Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
+                        var ipInPacket = new IPAddress(ipBytes);
+                        DisplayDebugInfo("Мой IP: " + localIPAdress + " IP в пакете: " + ipInPacket);
+                        if (localIPAdress.ToString() == ipInPacket.ToString())
+                        {
+                            user.hostInfo.IPEndPoint = remoteIP;
+                            DisplayDebugInfo("Получен broadcast пакет от " + user.hostInfo.Address);
+                            user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
+                            var usernamebytes = new byte[recievedData[6]];
+                            Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
+                            user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
+                            DisplayDebugInfo("Соединяюсь с " + user.hostInfo.Username);
+                            user.ConnectAsClient();
+                            users.Add(user);
+                            DisplayUserConnected(user.hostInfo.Username);
+                            Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                        }
+                        else DisplayDebugInfo("Не мне");
                     }
                 }
                 udpListener.Dispose();
@@ -347,7 +344,7 @@ namespace LocalChat
         {
             this.Invoke(new MethodInvoker(() =>
             {
-                txtMessageHistory.Text += ShowTime() + "Вы отключились"+"\n";
+                txtMessageHistory.Text += ShowTime() + "Вы отключились" + "\n";
             }));
         }
 
@@ -406,7 +403,7 @@ namespace LocalChat
         // Инициализирует доступные порты
         private void InitializeAvailablePorts()
         {
-            for (int i = 0; i<NUM_OF_AVAILABLE_PORTS;i++)
+            for (int i = 0; i < NUM_OF_AVAILABLE_PORTS; i++)
             {
                 availablePorts[i] = true;
             }
@@ -428,7 +425,7 @@ namespace LocalChat
         // Проверяет, есть ли уже такой ip в памяти
         private bool ThisIPAlreadyExists(IPAddress ip)
         {
-            foreach(var thisuser in users)
+            foreach (var thisuser in users)
             {
                 if (thisuser.hostInfo.Address.ToString() == ip.ToString())
                     return true;
