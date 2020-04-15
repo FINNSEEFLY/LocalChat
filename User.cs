@@ -52,6 +52,7 @@ namespace LocalChat
             tcpClient = tcpListener.AcceptTcpClient();
             stream = tcpClient.GetStream();
             tcpClient.ReceiveTimeout = 500;
+            tcpListener.Stop();
         }
         public void ConnectAsClient()
         {
@@ -94,7 +95,6 @@ namespace LocalChat
         }
         public void Dispose()
         {
-            tcpListener.Stop();
             stream.Close();
             stream.Dispose();
             tcpClient.Close();
