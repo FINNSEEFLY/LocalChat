@@ -94,54 +94,57 @@ namespace LocalChat
                     IPEndPoint remoteIP = null;
                                 DisplayDebugInfo("Слушаю UDPBroadcast");
                     var recievedData = udpListener.Receive(ref remoteIP);
-                    if (recievedData[0] == 1)
+                    if (isConnected)
                     {
-                        if (remoteIP.Address.ToString() != localIPAdress.ToString() && (!ThisIPAlreadyExists(remoteIP.Address)))
+                        if (recievedData[0] == 1)
+                        {
+                            if (remoteIP.Address.ToString() != localIPAdress.ToString() && (!ThisIPAlreadyExists(remoteIP.Address)))
+                            {
+                                var user = new User();
+                                user.hostInfo.IPEndPoint = remoteIP;
+                                DisplayDebugInfo("Получил UDPBroadcast пакет от нового пользователя");
+                                var usernameLength = recievedData[1];
+                                var data = new byte[usernameLength];
+                                Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
+                                user.hostInfo.Username = Encoding.Unicode.GetString(data);
+                                user.hostInfo.IPEndPoint = remoteIP;
+                                DisplayDebugInfo("Отправил порт к " + user.hostInfo.Address);
+                                user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
+                                DisplayDebugInfo("Готов к подключению через " + user.hostInfo.TCPSendingToPort);
+                                user.ConnectAsServer(localIPAdress);
+                                users.Add(user);
+                                DisplayUserConnected(user.hostInfo.Username);
+                                DisplayDebugInfo("Слушаю TCP");
+                                Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                            }
+                            else if (ThisIPAlreadyExists(remoteIP.Address)) DisplayDebugInfo("А такой уже есть");
+
+                        }
+                        else if (recievedData[0] == 2)
                         {
                             var user = new User();
                             user.hostInfo.IPEndPoint = remoteIP;
-                            DisplayDebugInfo("Получил UDPBroadcast пакет от нового пользователя");
-                            var usernameLength = recievedData[1];
-                            var data = new byte[usernameLength];
-                            Buffer.BlockCopy(recievedData, 2, data, 0, usernameLength);
-                            user.hostInfo.Username = Encoding.Unicode.GetString(data);
-                            user.hostInfo.IPEndPoint = remoteIP;
-                            DisplayDebugInfo("Отправил порт к " + user.hostInfo.Address);
-                            user.hostInfo.TCPSendingToPort = (int)TCP_OFFSET_RECEIVING_PORTS + SendPortAndUsernameToRemoteHost(user);
-                            DisplayDebugInfo("Готов к подключению через " + user.hostInfo.TCPSendingToPort);
-                            user.ConnectAsServer(localIPAdress);
-                            users.Add(user);
-                            DisplayUserConnected(user.hostInfo.Username);
-                            DisplayDebugInfo("Слушаю TCP");
-                            Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
-                        }
-                        else if (ThisIPAlreadyExists(remoteIP.Address)) DisplayDebugInfo("А такой уже есть");
-
-                    }
-                    else if (recievedData[0] == 2)
-                    {
-                        var user = new User();
-                        user.hostInfo.IPEndPoint = remoteIP;
                             DisplayDebugInfo("Получил UDPBroadcast пакет с портом");
-                        byte[] ipBytes = new byte[4];
-                        Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
-                        var ipInPacket = new IPAddress(ipBytes);
-                                DisplayDebugInfo("Мой IP: " + localIPAdress + " IP в пакете: " + ipInPacket);
-                        if (localIPAdress.ToString() == ipInPacket.ToString())
-                        {
-                            user.hostInfo.IPEndPoint = remoteIP;
-                                 DisplayDebugInfo("Получен broadcast пакет от " + user.hostInfo.Address);
-                            user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
-                            var usernamebytes = new byte[recievedData[6]];
-                            Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
-                            user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
+                            byte[] ipBytes = new byte[4];
+                            Buffer.BlockCopy(recievedData, 1, ipBytes, 0, 4);
+                            var ipInPacket = new IPAddress(ipBytes);
+                            DisplayDebugInfo("Мой IP: " + localIPAdress + " IP в пакете: " + ipInPacket);
+                            if (localIPAdress.ToString() == ipInPacket.ToString())
+                            {
+                                user.hostInfo.IPEndPoint = remoteIP;
+                                DisplayDebugInfo("Получен broadcast пакет от " + user.hostInfo.Address);
+                                user.hostInfo.TCPReceivingFromPort = (int)TCP_OFFSET_RECEIVING_PORTS + recievedData[5];
+                                var usernamebytes = new byte[recievedData[6]];
+                                Buffer.BlockCopy(recievedData, 7, usernamebytes, 0, recievedData[6]);
+                                user.hostInfo.Username = Encoding.Unicode.GetString(usernamebytes);
                                 DisplayDebugInfo("Соединяюсь с " + user.hostInfo.Username);
-                            user.ConnectAsClient();
-                            users.Add(user);
+                                user.ConnectAsClient();
+                                users.Add(user);
                                 DisplayUserConnected(user.hostInfo.Username);
-                            Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                                Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                            }
+                            else DisplayDebugInfo("Не мне");
                         }
-                        else DisplayDebugInfo("Не мне");
                     }
                 }
                 udpListener.Dispose();
