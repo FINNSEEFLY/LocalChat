@@ -116,6 +116,7 @@ namespace LocalChat
                             DisplayDebugInfo("Слушаю TCP");
                             Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
                         }
+                        else if (ThisIPAlreadyExists(remoteIP.Address)) DisplayDebugInfo("А такой уже есть");
 
                     }
                     else if (recievedData[0] == 2)
@@ -201,10 +202,6 @@ namespace LocalChat
                             user.hostInfo.Username = usernameNew;
                             break;
                         case TYPE_DISCONNECT:
-                            DisplayUserDisconnected(user.hostInfo.Username);
-                            availablePorts[user.PortWithConnection - TCP_OFFSET_RECEIVING_PORTS] = true;
-                            users.Remove(user);
-                            user.Dispose();
                             user.Listen = false;
                             break;
                         default:
@@ -213,6 +210,10 @@ namespace LocalChat
                 }
                 catch { };
             }
+            DisplayUserDisconnected(user.hostInfo.Username);
+            availablePorts[user.PortWithConnection - TCP_OFFSET_RECEIVING_PORTS] = true;
+            users.Remove(user);
+            user.Dispose();
         }
 
         // Отправить сообщение
