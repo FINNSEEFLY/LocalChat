@@ -323,10 +323,14 @@ namespace LocalChat
         // Отобразить сообщение об отключении пользователя
         private void DisplayUserDisconnected(String username)
         {
-            this.Invoke(new MethodInvoker(() =>
+            try
             {
-                txtMessageHistory.Text += ShowTime() + username + " Отключился" + "\n";
-            }));
+                this.Invoke(new MethodInvoker(() =>
+                {
+                    txtMessageHistory.Text += ShowTime() + username + " Отключился" + "\n";
+                }));
+            }
+            catch { };
         }
 
         // Отобразить сообщение о том, что вы подключились
@@ -439,7 +443,7 @@ namespace LocalChat
             SaveLog();
         }
 
-        private void btnAcceptName_Click(object sender, EventArgs e)
+        private void ChangeUsername()
         {
             var random = new Random();
             username = txtNickname.Text + "#" + random.Next(1, 1000);
@@ -451,6 +455,11 @@ namespace LocalChat
                 }
             }
             txtMessageHistory.Text += ShowTime() + "Ваше имя будет отображаться как: " + username + "\n";
+        }
+
+        private void btnAcceptName_Click(object sender, EventArgs e)
+        {
+            ChangeUsername();
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -491,6 +500,7 @@ namespace LocalChat
         {
             if (e.KeyCode == Keys.Enter)
             {
+                e.SuppressKeyPress = true;
                 SendMessage();
             }
         }
@@ -498,6 +508,15 @@ namespace LocalChat
         private void btnClearHistory_Click(object sender, EventArgs e)
         {
             ClearHistory();
+        }
+
+        private void txtNickname_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                ChangeUsername();
+            }
         }
     }
 }

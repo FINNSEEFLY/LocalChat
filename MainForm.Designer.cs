@@ -132,6 +132,7 @@
             this.txtNickname.Name = "txtNickname";
             this.txtNickname.Size = new System.Drawing.Size(228, 24);
             this.txtNickname.TabIndex = 0;
+            this.txtNickname.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtNickname_KeyDown);
             // 
             // lblYourNickname
             // 
