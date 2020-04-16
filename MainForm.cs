@@ -317,6 +317,7 @@ namespace LocalChat
         private void btnConnect_Click(object sender, EventArgs e)
         {
             isConnected = true;
+            DisplayUserConnected(localUsername);
             PrepareComponentsConnectedMode();
             SendBroadcastMessage();
         }
