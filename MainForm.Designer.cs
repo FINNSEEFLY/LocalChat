@@ -176,7 +176,7 @@
             this.txtMessageHistory.BackColor = System.Drawing.SystemColors.Window;
             this.txtMessageHistory.CausesValidation = false;
             this.txtMessageHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtMessageHistory.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.txtMessageHistory.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.txtMessageHistory.Location = new System.Drawing.Point(0, 0);
             this.txtMessageHistory.Name = "txtMessageHistory";
             this.txtMessageHistory.ReadOnly = true;

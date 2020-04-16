@@ -219,7 +219,7 @@ namespace LocalChat
         {
             this.Invoke(new MethodInvoker(() =>
             {
-                txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + ": " + message + "\n";
+                txtMessageHistory.Text += ShowTime() + "[" + ip + "] " + username + ": " + message + "\n";
             }));
         }
 
@@ -228,7 +228,7 @@ namespace LocalChat
         {
             this.Invoke(new MethodInvoker(() =>
             {
-                txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + " изменил имя на " + usernamenew + "\n";
+                txtMessageHistory.Text += ShowTime() + "[" + ip + "] " + username + ": изменил имя на " + usernamenew + "\n";
             }));
         }
 
@@ -239,7 +239,7 @@ namespace LocalChat
             {
                 this.Invoke(new MethodInvoker(() =>
                 {
-                    txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + " отключился" + "\n";
+                    txtMessageHistory.Text += ShowTime() + "[" + ip + "] " + username + ": отключился" + "\n";
                 }));
             }
             catch { };
@@ -250,7 +250,7 @@ namespace LocalChat
         {
             this.Invoke(new MethodInvoker(() =>
             {
-                txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + " подключился" + "\n";
+                txtMessageHistory.Text += ShowTime() + "[" + ip + "] " + username + ": подключился" + "\n";
             }));
         }
 
@@ -259,14 +259,14 @@ namespace LocalChat
         { 
             var message = txtMessage.Text;
             SendMessageByTCP(message);
-            txtMessageHistory.Text += ShowTime() +"["+localIPAddress+"]\t"+ localUsername + ": " + message + "\n";
+            txtMessageHistory.Text += ShowTime() +"["+localIPAddress+"] "+ localUsername + ": " + message + "\n";
             txtMessage.Text = "";
         }
 
         // Возвращает время в нужном формате в виде строки
         private string ShowTime()
         {
-            string returnValue = "["+DateTime.Now.ToString("HH:MM:ss") +"]";
+            string returnValue = "["+DateTime.Now.ToString("HH:MM:ss") +"] ";
             return returnValue;
         }
 
