@@ -63,21 +63,24 @@ namespace LocalChat
         // Ожидание Broadcast пакетов новых пользователей
         private void ListenBroadcastUDP()
         {
+            var udpListener = new UdpClient((int)UDP_BROADCAST_PORT);
+            udpListener.EnableBroadcast = true;
             while (true)
             {
-                var udpListener = new UdpClient((int)UDP_BROADCAST_PORT);
-                udpListener.EnableBroadcast = true;
                 IPEndPoint remoteHost = null;
                 var recievedData = udpListener.Receive(ref remoteHost);
                 if (isConnected)
                 {
-                    var user = new User();
-                    user.IPEndPoint = remoteHost;
-                    user.Username = Encoding.Unicode.GetString(recievedData);
-                    user.Connect();
-                    user.SendConnected(localUsername);
-                    users.Add(user);
-                    Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                    if (remoteHost.Address.ToString() != localIPAddress.ToString())
+                    {
+                        var user = new User();
+                        user.IPEndPoint = remoteHost;
+                        user.Username = Encoding.Unicode.GetString(recievedData);
+                        user.Connect();
+                        user.SendConnected(localUsername);
+                        users.Add(user);
+                        Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                    }
                 }
             }
         }
@@ -102,7 +105,6 @@ namespace LocalChat
             }
             tcpListener.Stop();
         }
-
 
         private void ListenTCP(User user)
         {
@@ -183,34 +185,6 @@ namespace LocalChat
             users.Clear();
         }
 
-        public MainForm()
-        {
-            InitializeComponent();
-            PrepareComponentsDisconnectedMode();
-            var random = new Random();
-            localUsername = "User#" + random.Next(1, 1000);
-            localIPAddress = LocalIPAddress();
-            Task.Factory.StartNew(ListenBroadcastUDP);
-        }
-
-        // Подготовка интерфейса к режиму с соединением
-        private void PrepareComponentsConnectedMode()
-        {
-            btnConnect.Enabled = false;
-            btnDisconnect.Enabled = true;
-            btnSend.Enabled = true;
-            txtMessage.Enabled = true;
-        }
-
-        // Подготовка интерфейса к режиму без соединения
-        private void PrepareComponentsDisconnectedMode()
-        {
-            btnConnect.Enabled = true;
-            btnDisconnect.Enabled = false;
-            btnSend.Enabled = false;
-            txtMessage.Enabled = false;
-        }
-
         // ОТЛАДОЧНАЯ ФУНКЦИЯ
         private void DisplayDebugInfo(string message)
         {
@@ -262,7 +236,7 @@ namespace LocalChat
 
         // Отправить сообщение
         private void SendMessage()
-        {
+        { 
             var message = txtMessage.Text;
             SendMessageByTCP(message);
             txtMessageHistory.Text += ShowTime() + localUsername + ": " + message + "\n";
@@ -325,6 +299,16 @@ namespace LocalChat
             localUsername = newlocalusername;
         }
 
+        public MainForm()
+        {
+            InitializeComponent();
+            PrepareComponentsDisconnectedMode();
+            var random = new Random();
+            localUsername = "User#" + random.Next(1, 1000);
+            localIPAddress = LocalIPAddress();
+            Task.Factory.StartNew(ListenBroadcastUDP);
+        }
+
         private void btnAcceptName_Click(object sender, EventArgs e)
         {
             ChangeUsername();
@@ -383,5 +367,24 @@ namespace LocalChat
                 ChangeUsername();
             }
         }
+
+        // Подготовка интерфейса к режиму с соединением
+        private void PrepareComponentsConnectedMode()
+        {
+            btnConnect.Enabled = false;
+            btnDisconnect.Enabled = true;
+            btnSend.Enabled = true;
+            txtMessage.Enabled = true;
+        }
+
+        // Подготовка интерфейса к режиму без соединения
+        private void PrepareComponentsDisconnectedMode()
+        {
+            btnConnect.Enabled = true;
+            btnDisconnect.Enabled = false;
+            btnSend.Enabled = false;
+            txtMessage.Enabled = false;
+        }
+
     }
 }
