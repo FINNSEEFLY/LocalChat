@@ -163,16 +163,16 @@ namespace LocalChat
                                 break;
 
                             case TYPE_RESPONSE_CHAT_HISTORY:
-                                string chatHistory = Encoding.Unicode.GetString(data, 0, data.Length);
-                                if (txtMessageHistory.Text.Length<chatHistory.Length)
+                                string chatHistory = Encoding.Unicode.GetString(data, 0, data.Length);                          
+                                this.Invoke(new MethodInvoker(() =>
                                 {
-                                    this.Invoke(new MethodInvoker(() =>
+                                    if (txtMessageHistory.Text.Length < chatHistory.Length)
                                     {
-                                        txtMessageHistory.Text = chatHistory;
-                                    }));
-                                }
-                                break;
 
+                                        txtMessageHistory.Text = chatHistory;
+                                    }                                    
+                                }));
+                                break;
                             default: throw new Exception("Неизвестный тип пакета");
                         }
                     }
