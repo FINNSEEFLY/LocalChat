@@ -377,12 +377,6 @@ namespace LocalChat
             }
         }
 
-        private void txtUsername_MouseDown(object sender, MouseEventArgs e)
-        {
-            txtUsername.Text = "";
-            this.txtUsername.MouseDown -= new System.Windows.Forms.MouseEventHandler(this.txtUsername_MouseDown);
-        }
-
         // Подготовка интерфейса к режиму с соединением
         private void PrepareComponentsConnectedMode()
         {

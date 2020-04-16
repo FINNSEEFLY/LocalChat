@@ -133,7 +133,6 @@
             this.txtUsername.Size = new System.Drawing.Size(228, 24);
             this.txtUsername.TabIndex = 0;
             this.txtUsername.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtNickname_KeyDown);
-            this.txtUsername.MouseDown += new System.Windows.Forms.MouseEventHandler(this.txtUsername_MouseDown);
             // 
             // lblYourNickname
             // 
