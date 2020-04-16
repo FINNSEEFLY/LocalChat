@@ -100,8 +100,8 @@ namespace LocalChat
                 if (tcpListener.Pending())
                 {
                     var user = new User();
-                    user.IPEndPoint = ((IPEndPoint)user.tcpClient.Client.RemoteEndPoint);
                     user.tcpClient = tcpListener.AcceptTcpClient();
+                    user.IPEndPoint = ((IPEndPoint)user.tcpClient.Client.RemoteEndPoint);
                     user.stream = user.tcpClient.GetStream();
                     user.tcpClient.ReceiveTimeout = 500;
                     user.SendConnected(localUsername);
