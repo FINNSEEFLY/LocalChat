@@ -162,7 +162,10 @@ namespace LocalChat
                                 string chatHistory = Encoding.Unicode.GetString(data, 0, data.Length);
                                 if (txtMessageHistory.Text.Length<chatHistory.Length)
                                 {
-                                    txtMessageHistory.Text = chatHistory;
+                                    this.Invoke(new MethodInvoker(() =>
+                                    {
+                                        txtMessageHistory.Text = chatHistory;
+                                    }));
                                 }
                                 break;
 
@@ -259,20 +262,7 @@ namespace LocalChat
         // Возвращает время в нужном формате в виде строки
         private string ShowTime()
         {
-            var thisMoment = DateTime.Now;
-            string returnValue = "[";
-            if (thisMoment.Hour < 10)
-                returnValue += "0" + thisMoment.Hour + ":";
-            else
-                returnValue += thisMoment.Hour + ":";
-            if (thisMoment.Minute < 10)
-                returnValue += "0" + thisMoment.Minute + ":";
-            else
-                returnValue += thisMoment.Minute + ":";
-            if (thisMoment.Second < 10)
-                returnValue += "0" + thisMoment.Second + "] ";
-            else
-                returnValue += thisMoment.Second + "] ";
+            string returnValue = "["+DateTime.Now.ToString("HH:MM:ss") +"]";
             return returnValue;
         }
 
