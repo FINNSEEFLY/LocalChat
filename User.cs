@@ -50,7 +50,7 @@ namespace LocalChat
             }
         }
         public bool Listen { get; set; } = true;
-        
+
         public void Connect()
         {
             tcpClient = new TcpClient();
@@ -126,7 +126,7 @@ namespace LocalChat
                 Buffer.BlockCopy(recieveData, 0, returnData, 0, numOfReciviedBytes);
                 return returnData;
             }
-            else throw new Exception("Поток с "+IPv4Address+" пустой но производится чтение!");
+            else throw new Exception("Поток с " + IPv4Address + " пустой но производится чтение!");
         }
         public byte[] ReciveTypeAndLength()
         {
@@ -139,7 +139,7 @@ namespace LocalChat
                 return returnData;
             }
             else throw new Exception("Поток с " + IPv4Address + " пустой но производится чтение!");
-        }        
+        }
         public void Dispose()
         {
             stream.Close();

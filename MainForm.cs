@@ -100,6 +100,7 @@ namespace LocalChat
                 if (tcpListener.Pending())
                 {
                     var user = new User();
+                    user.IPEndPoint = ((IPEndPoint)user.tcpClient.Client.RemoteEndPoint);
                     user.tcpClient = tcpListener.AcceptTcpClient();
                     user.stream = user.tcpClient.GetStream();
                     user.tcpClient.ReceiveTimeout = 500;
@@ -133,7 +134,10 @@ namespace LocalChat
                                 break;
 
                             case TYPE_REQUEST_CHAT_HISTORY:
-                                user.SendChatHistory(txtMessageHistory.Text);
+                                this.Invoke(new MethodInvoker(() =>
+                                {
+                                    user.SendChatHistory(txtMessageHistory.Text);
+                                }));                                
                                 break;
                         }
                     }
