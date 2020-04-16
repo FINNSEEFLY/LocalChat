@@ -31,7 +31,7 @@ namespace LocalChat
         private const byte TYPE_MESSAGE = 1;
         private const byte TYPE_CHANGE_NAME = 2;
         private const byte TYPE_DISCONNECT = 3;
-        private const byte TYPE_REQUEST_CHAT_HISTROY = 4;
+        private const byte TYPE_REQUEST_CHAT_HISTORY = 4;
         private const byte TYPE_RESPONSE_CHAT_HISTORY = 5;
         private const byte TYPE_AND_LENGTH_SIZE = 5;
         private const int SIZE_OF_INT = sizeof(int);
@@ -42,7 +42,7 @@ namespace LocalChat
 
         public string Username { get; set; }
         public IPEndPoint IPEndPoint { get; set; }
-        public IPAddress Address
+        public IPAddress IPv4Address
         {
             get
             {
@@ -54,7 +54,7 @@ namespace LocalChat
         public void Connect()
         {
             tcpClient = new TcpClient();
-            tcpClient.Connect(new IPEndPoint(Address, (int)TCP_DEFAULT_PORT));
+            tcpClient.Connect(new IPEndPoint(IPv4Address, (int)TCP_DEFAULT_PORT));
             stream = tcpClient.GetStream();
             tcpClient.ReceiveTimeout = 500;
         }
@@ -98,6 +98,24 @@ namespace LocalChat
             Buffer.BlockCopy(chatHistoryBytes, 0, data, TYPE_AND_LENGTH_SIZE, chatHistoryBytes.Length);
             stream.Write(data, 0, data.Length);
         }
+        public void SendChatHistoryRequest()
+        {
+            var data = new byte[TYPE_AND_LENGTH_SIZE];
+            data[0] = TYPE_REQUEST_CHAT_HISTORY;
+            int length = 0;
+            var lengthBytes = BitConverter.GetBytes(length);
+            Buffer.BlockCopy(lengthBytes, 0, data, 1, SIZE_OF_INT);
+            stream.Write(data, 0, data.Length);
+        }
+        public void SendDisconnect()
+        {
+            var data = new byte[TYPE_AND_LENGTH_SIZE];
+            data[0] = TYPE_DISCONNECT;
+            int length = 0;
+            var lengthBytes = BitConverter.GetBytes(length);
+            Buffer.BlockCopy(lengthBytes, 0, data, 1, SIZE_OF_INT);
+            stream.Write(data, 0, data.Length);
+        }
         public byte[] RecieveMessage(int messagelength)
         {
             if (stream.DataAvailable)
@@ -108,7 +126,7 @@ namespace LocalChat
                 Buffer.BlockCopy(recieveData, 0, returnData, 0, numOfReciviedBytes);
                 return returnData;
             }
-            else throw new Exception("Поток с "+Address+" пустой но производится чтение!");
+            else throw new Exception("Поток с "+IPv4Address+" пустой но производится чтение!");
         }
         public byte[] ReciveTypeAndLength()
         {
@@ -120,17 +138,8 @@ namespace LocalChat
                 Buffer.BlockCopy(recieveData, 0, returnData, 0, numOfReciviedBytes);
                 return returnData;
             }
-            else throw new Exception("Поток с " + Address + " пустой но производится чтение!");
+            else throw new Exception("Поток с " + IPv4Address + " пустой но производится чтение!");
         }        
-        public void SendDisconnect()
-        {
-            var data = new byte[TYPE_AND_LENGTH_SIZE];
-            data[0] = TYPE_DISCONNECT;
-            int length = 0;
-            var lengthBytes = BitConverter.GetBytes(length);
-            Buffer.BlockCopy(lengthBytes, 0, data, 1, SIZE_OF_INT);
-            stream.Write(data, 0, data.Length);
-        }
         public void Dispose()
         {
             stream.Close();

@@ -34,7 +34,7 @@
             this.btnDisconnect = new System.Windows.Forms.Button();
             this.pnlNameArea = new System.Windows.Forms.Panel();
             this.btnAcceptName = new System.Windows.Forms.Button();
-            this.txtNickname = new System.Windows.Forms.TextBox();
+            this.txtUsername = new System.Windows.Forms.TextBox();
             this.lblYourNickname = new System.Windows.Forms.Label();
             this.btnExit = new System.Windows.Forms.Button();
             this.pnlChatArea = new System.Windows.Forms.Panel();
@@ -84,7 +84,7 @@
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(228, 43);
             this.btnConnect.TabIndex = 3;
-            this.btnConnect.Text = "Подключится";
+            this.btnConnect.Text = "Подключиться";
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
@@ -97,14 +97,14 @@
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(228, 43);
             this.btnDisconnect.TabIndex = 4;
-            this.btnDisconnect.Text = "Отключится";
+            this.btnDisconnect.Text = "Отключиться";
             this.btnDisconnect.UseVisualStyleBackColor = true;
             this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
             // 
             // pnlNameArea
             // 
             this.pnlNameArea.Controls.Add(this.btnAcceptName);
-            this.pnlNameArea.Controls.Add(this.txtNickname);
+            this.pnlNameArea.Controls.Add(this.txtUsername);
             this.pnlNameArea.Controls.Add(this.lblYourNickname);
             this.pnlNameArea.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlNameArea.Location = new System.Drawing.Point(0, 0);
@@ -125,25 +125,26 @@
             this.btnAcceptName.UseVisualStyleBackColor = true;
             this.btnAcceptName.Click += new System.EventHandler(this.btnAcceptName_Click);
             // 
-            // txtNickname
+            // txtUsername
             // 
-            this.txtNickname.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.txtNickname.Location = new System.Drawing.Point(0, 39);
-            this.txtNickname.Name = "txtNickname";
-            this.txtNickname.Size = new System.Drawing.Size(228, 24);
-            this.txtNickname.TabIndex = 0;
-            this.txtNickname.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtNickname_KeyDown);
+            this.txtUsername.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.txtUsername.Location = new System.Drawing.Point(0, 39);
+            this.txtUsername.Name = "txtUsername";
+            this.txtUsername.Size = new System.Drawing.Size(228, 24);
+            this.txtUsername.TabIndex = 0;
+            this.txtUsername.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtNickname_KeyDown);
+            this.txtUsername.MouseDown += new System.Windows.Forms.MouseEventHandler(this.txtUsername_MouseDown);
             // 
             // lblYourNickname
             // 
             this.lblYourNickname.AutoSize = true;
             this.lblYourNickname.Cursor = System.Windows.Forms.Cursors.Default;
             this.lblYourNickname.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lblYourNickname.Location = new System.Drawing.Point(48, 8);
+            this.lblYourNickname.Location = new System.Drawing.Point(65, 8);
             this.lblYourNickname.Name = "lblYourNickname";
-            this.lblYourNickname.Size = new System.Drawing.Size(123, 22);
+            this.lblYourNickname.Size = new System.Drawing.Size(94, 22);
             this.lblYourNickname.TabIndex = 0;
-            this.lblYourNickname.Text = "Ваш никнейм";
+            this.lblYourNickname.Text = "Ваше имя";
             this.lblYourNickname.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnExit
@@ -245,7 +246,7 @@
         private System.Windows.Forms.Panel pnlChatArea;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.Panel pnlNameArea;
-        private System.Windows.Forms.TextBox txtNickname;
+        private System.Windows.Forms.TextBox txtUsername;
         private System.Windows.Forms.Label lblYourNickname;
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button btnDisconnect;

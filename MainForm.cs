@@ -44,7 +44,6 @@ namespace LocalChat
         private string localUsername;
         private TcpListener tcpListener;
         private List<User> users = new List<User>();
-        private List<string> chatHistoryList = new List<string>();
         private IPAddress localIPAddress;
 
 
@@ -56,7 +55,10 @@ namespace LocalChat
             udpClient.EnableBroadcast = true;
             var data = Encoding.Unicode.GetBytes(localUsername);
             Task.Factory.StartNew(ListeningForConnections);
-            udpClient.Send(data, data.Length);
+            for (int i = 0; i < 5; i++)
+            {
+                udpClient.Send(data, data.Length);
+            }
             udpClient.Dispose();
         }
 
@@ -73,13 +75,16 @@ namespace LocalChat
                 {
                     if (remoteHost.Address.ToString() != localIPAddress.ToString())
                     {
-                        var user = new User();
-                        user.IPEndPoint = remoteHost;
-                        user.Username = Encoding.Unicode.GetString(recievedData);
-                        user.Connect();
-                        user.SendConnected(localUsername);
-                        users.Add(user);
-                        Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                        if (!AlreadyConnected(remoteHost.Address))
+                        {
+                            var user = new User();
+                            user.IPEndPoint = remoteHost;
+                            user.Username = Encoding.Unicode.GetString(recievedData);
+                            user.Connect();
+                            user.SendConnected(localUsername);
+                            users.Add(user);
+                            Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
+                        }
                     }
                 }
             }
@@ -99,6 +104,7 @@ namespace LocalChat
                     user.stream = user.tcpClient.GetStream();
                     user.tcpClient.ReceiveTimeout = 500;
                     user.SendConnected(localUsername);
+                    user.SendChatHistoryRequest();
                     users.Add(user);
                     Task.Factory.StartNew(() => ListenTCP(users[users.IndexOf(user)]));
                 }
@@ -121,7 +127,7 @@ namespace LocalChat
                         {
                             case TYPE_DISCONNECT:
                                 user.Listen = false;
-                                DisplayUserDisconnected(user.Username);
+                                DisplayUserDisconnected(user.IPv4Address, user.Username);
                                 users.Remove(user);
                                 user.Dispose();
                                 break;
@@ -138,23 +144,26 @@ namespace LocalChat
                         {
                             case TYPE_CONNECT:
                                 user.Username = Encoding.Unicode.GetString(data, 0, data.Length);
-                                DisplayUserConnected(user.Username);
+                                DisplayUserConnected(user.IPv4Address, user.Username);
                                 break;
 
                             case TYPE_MESSAGE:
                                 string message = Encoding.Unicode.GetString(data, 0, data.Length);
-                                DisplayAMessage(message, user.Username);
+                                DisplayAMessage(message, user.IPv4Address, user.Username);
                                 break;
 
                             case TYPE_CHANGE_NAME:
                                 string usernameNew = Encoding.Unicode.GetString(data, 0, data.Length);
-                                DisplayChangeNameMessage(user.Username, usernameNew);
+                                DisplayChangeNameMessage(user.IPv4Address, user.Username, usernameNew);
                                 user.Username = usernameNew;
                                 break;
 
                             case TYPE_RESPONSE_CHAT_HISTORY:
                                 string chatHistory = Encoding.Unicode.GetString(data, 0, data.Length);
-                                chatHistoryList.Add(chatHistory);
+                                if (txtMessageHistory.Text.Length<chatHistory.Length)
+                                {
+                                    txtMessageHistory.Text = chatHistory;
+                                }
                                 break;
 
                             default: throw new Exception("Неизвестный тип пакета");
@@ -185,52 +194,56 @@ namespace LocalChat
             users.Clear();
         }
 
-        // ОТЛАДОЧНАЯ ФУНКЦИЯ
-        private void DisplayDebugInfo(string message)
+        // Подключен ли уже пользователь с данным ip
+        private bool AlreadyConnected(IPAddress ip)
         {
-            this.Invoke(new MethodInvoker(() =>
+            foreach(var user in users)
             {
-                txtMessageHistory.Text += ShowTime() + message + "\n";
-            }));
+                if (user.IPv4Address.ToString() == ip.ToString())
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Отобразить сообщение message пользователя username
-        private void DisplayAMessage(string message, string username)
+        private void DisplayAMessage(string message, IPAddress ip, string username)
         {
             this.Invoke(new MethodInvoker(() =>
             {
-                txtMessageHistory.Text += ShowTime() + username + ": " + message + "\n";
+                txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + ": " + message + "\n";
             }));
         }
 
         // Отобразить изменение имени пользователя
-        private void DisplayChangeNameMessage(string usernameold, string usernamenew)
+        private void DisplayChangeNameMessage(IPAddress ip, string username, string usernamenew)
         {
             this.Invoke(new MethodInvoker(() =>
             {
-                txtMessageHistory.Text += ShowTime() + usernameold + " изменил имя на " + usernamenew + "\n";
+                txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + " изменил имя на " + usernamenew + "\n";
             }));
         }
 
         // Отобразить сообщение об отключении пользователя
-        private void DisplayUserDisconnected(string username)
+        private void DisplayUserDisconnected(IPAddress ip, string username)
         {
             try
             {
                 this.Invoke(new MethodInvoker(() =>
                 {
-                    txtMessageHistory.Text += ShowTime() + username + " отключился" + "\n";
+                    txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + " отключился" + "\n";
                 }));
             }
             catch { };
         }
 
         // Отобразить сообщение о том, что пользователь подключился
-        private void DisplayUserConnected(string username)
+        private void DisplayUserConnected(IPAddress ip, string username)
         {
             this.Invoke(new MethodInvoker(() =>
             {
-                txtMessageHistory.Text += ShowTime() + username + " подключился" + "\n";
+                txtMessageHistory.Text += ShowTime() + "[" + ip + "]\t" + username + " подключился" + "\n";
             }));
         }
 
@@ -239,7 +252,7 @@ namespace LocalChat
         { 
             var message = txtMessage.Text;
             SendMessageByTCP(message);
-            txtMessageHistory.Text += ShowTime() + localUsername + ": " + message + "\n";
+            txtMessageHistory.Text += ShowTime() +"["+localIPAddress+"]\t"+ localUsername + ": " + message + "\n";
             txtMessage.Text = "";
         }
 
@@ -286,8 +299,7 @@ namespace LocalChat
         // Изменить имя
         private void ChangeUsername()
         {
-            var random = new Random();
-            var newlocalusername = txtNickname.Text + "#" + random.Next(1, 1000);
+            var newlocalusername = txtUsername.Text;
             if (isConnected)
             {
                 foreach (var user in users)
@@ -295,7 +307,7 @@ namespace LocalChat
                     user.SendChangeUsername(newlocalusername);
                 }
             }
-            DisplayChangeNameMessage(localUsername, newlocalusername);
+            DisplayChangeNameMessage(localIPAddress, localUsername, newlocalusername);
             localUsername = newlocalusername;
         }
 
@@ -307,6 +319,7 @@ namespace LocalChat
             localUsername = "User#" + random.Next(1, 1000);
             localIPAddress = LocalIPAddress();
             Task.Factory.StartNew(ListenBroadcastUDP);
+            txtUsername.Text = localUsername;
         }
 
         private void btnAcceptName_Click(object sender, EventArgs e)
@@ -317,7 +330,7 @@ namespace LocalChat
         private void btnConnect_Click(object sender, EventArgs e)
         {
             isConnected = true;
-            DisplayUserConnected(localUsername);
+            DisplayUserConnected(localIPAddress, localUsername);
             PrepareComponentsConnectedMode();
             SendBroadcastMessage();
         }
@@ -327,7 +340,7 @@ namespace LocalChat
             PrepareComponentsDisconnectedMode();
             isConnected = false;
             Disconnect();
-            DisplayUserDisconnected(localUsername);
+            DisplayUserDisconnected(localIPAddress, localUsername);
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -369,6 +382,12 @@ namespace LocalChat
             }
         }
 
+        private void txtUsername_MouseDown(object sender, MouseEventArgs e)
+        {
+            txtUsername.Text = "";
+            this.txtUsername.MouseDown -= new System.Windows.Forms.MouseEventHandler(this.txtUsername_MouseDown);
+        }
+
         // Подготовка интерфейса к режиму с соединением
         private void PrepareComponentsConnectedMode()
         {
@@ -386,6 +405,5 @@ namespace LocalChat
             btnSend.Enabled = false;
             txtMessage.Enabled = false;
         }
-
     }
 }
