@@ -39,6 +39,7 @@ namespace LocalChat
         private const byte TYPE_DISCONNECT = 3;
         private const byte TYPE_REQUEST_CHAT_HISTORY = 4;
         private const byte TYPE_RESPONSE_CHAT_HISTORY = 5;
+        private const byte NUM_OF_UDP_PACKET = 10;
         private const string BROADCAST_ADDRESS = "255.255.255.255";
         private bool isConnected = false;
         private string localUsername;
@@ -55,7 +56,7 @@ namespace LocalChat
             udpClient.EnableBroadcast = true;
             var data = Encoding.Unicode.GetBytes(localUsername);
             Task.Factory.StartNew(ListeningForConnections);
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < NUM_OF_UDP_PACKET; i++)
             {
                 udpClient.Send(data, data.Length);
             }
