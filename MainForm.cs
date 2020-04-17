@@ -267,7 +267,7 @@ namespace LocalChat
         // Возвращает время в нужном формате в виде строки
         private string ShowTime()
         {
-            string returnValue = "["+DateTime.Now.ToString("HH:MM:ss") +"] ";
+            string returnValue = "["+DateTime.Now.ToString("HH:mm:ss") +"] ";
             return returnValue;
         }
 
