@@ -114,6 +114,7 @@ namespace LocalChat
             tcpListener.Stop();
         }
 
+        // Обработка сообщений от узлов
         private void ListenTCP(User user)
         {
             while (user.Listen)
