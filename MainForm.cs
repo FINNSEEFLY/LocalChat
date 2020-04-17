@@ -31,8 +31,8 @@ namespace LocalChat
         /* Формат широковещательного UDP сообщения:
             0-n: имя пользователя
         */
-        private const UInt32 UDP_BROADCAST_PORT = 31576;
-        private const UInt32 TCP_DEFAULT_PORT = 1337;
+        private const ushort UDP_BROADCAST_PORT = 31576;
+        private const ushort TCP_DEFAULT_PORT = 1337;
         private const byte TYPE_CONNECT = 0;
         private const byte TYPE_MESSAGE = 1;
         private const byte TYPE_CHANGE_NAME = 2;

@@ -26,7 +26,7 @@ namespace LocalChat
             Все последующие:
                 сообщение
         */
-        private const UInt32 TCP_DEFAULT_PORT = 1337;
+        private const ushort TCP_DEFAULT_PORT = 1337;
         private const byte TYPE_CONNECT = 0;
         private const byte TYPE_MESSAGE = 1;
         private const byte TYPE_CHANGE_NAME = 2;
