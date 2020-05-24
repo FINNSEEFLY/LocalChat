@@ -395,5 +395,12 @@ namespace LocalChat
             btnSend.Enabled = false;
             txtMessage.Enabled = false;
         }
+        
+        
+        ~MainForm()
+        {
+            Disconnect();
+        }
+       
     }
 }

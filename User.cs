@@ -54,10 +54,12 @@ namespace LocalChat
         public void Connect()
         {
             tcpClient = new TcpClient();
+            
             tcpClient.Connect(new IPEndPoint(IPv4Address, (int)TCP_DEFAULT_PORT));
             stream = tcpClient.GetStream();
             tcpClient.ReceiveTimeout = 500;
         }
+
         public void SendConnected(string localusername)
         {
             var localUsernameBytes = Encoding.Unicode.GetBytes(localusername);
